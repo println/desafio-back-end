@@ -21,11 +21,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.exceptionHandling()
 		.and()
 		.authorizeRequests()
-		.antMatchers("/api/open/**").permitAll()
-		.antMatchers("/api/**").permitAll()
-		.antMatchers("/console/**").permitAll();
+		.antMatchers("/api/**").permitAll();
 
+		this.enableH2Console(http);
+
+	}
+
+	private void enableH2Console(HttpSecurity http) throws Exception {
+		http.authorizeRequests().antMatchers("/console/**").permitAll();
 		http.headers().frameOptions().sameOrigin();
-
 	}
 }

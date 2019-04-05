@@ -42,8 +42,8 @@ public class EmployeeService {
 		return this.repository.save(entity);
 	}
 
-	public Employee update(@Valid Employee employee) {
-		Optional<Employee> result = this.findById(employee.getId());
+	public Employee update(Long id, @Valid Employee employee) {
+		Optional<Employee> result = this.findById(id);
 
 		if (!result.isPresent()) {
 			throw new BadRequestAlertException("Not exists", ENTITY_NAME, "idnull");
