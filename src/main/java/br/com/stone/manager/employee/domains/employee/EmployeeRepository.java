@@ -11,5 +11,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 	@Query(value = "SELECT DISTINCT role FROM Employee e WHERE LOWER(role) LIKE CONCAT('%',LOWER(:query),'%') ORDER BY role ASC")
-	List<String> findRolesByQuery(@Param("query") String contains);
+	List<String> searchRoles(@Param("query") String contains);
+
+	@Query(value = "SELECT DISTINCT role FROM Employee ORDER BY role ASC")
+	List<String> findAllRoles();
 }
