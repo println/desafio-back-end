@@ -37,36 +37,16 @@ public class EmployeeRequestFilter {
 		this.role = role;
 	}
 
-	public int getNumber() {
-		if (Objects.isNull(this.age) && Objects.isNull(this.role)) {
-			return 1;
-		}
-
-		if (Objects.isNull(this.name) && Objects.isNull(this.role)) {
-			return 2;
-		}
-
-		if (Objects.isNull(this.name) && Objects.isNull(this.age)) {
-			return 3;
-		}
-
-		if (Objects.isNull(this.role)) {
-			return 4;
-		}
-
-		if (Objects.isNull(this.age)) {
-			return 5;
-		}
-
-		if (Objects.isNull(this.name)) {
-			return 6;
-		}
-
-		return 7;
+	public boolean hasName() {
+		return Objects.nonNull(this.name);
 	}
 
-	public boolean isEmpty() {
-		return Objects.isNull(this.name) && Objects.isNull(this.age) && Objects.isNull(this.role);
+	public boolean hasAge() {
+		return Objects.nonNull(this.age);
+	}
+
+	public boolean hasRole() {
+		return Objects.nonNull(this.role);
 	}
 
 }

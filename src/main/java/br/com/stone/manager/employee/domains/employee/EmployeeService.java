@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import br.com.stone.manager.employee.support.web.rest.errors.BadRequestAlertException;
@@ -21,10 +22,19 @@ public class EmployeeService {
 	}
 
 	public Page<Employee> findAll(EmployeeRequestFilter filter, Pageable pageable) {
-		if (!filter.isEmpty()) {
-			return this.findAllByCriteria(filter, pageable);
+		Specification<Employee> specification = Specification.where(null);
+		if (filter.hasName()) {
+			specification = specification.and(
+			                                  EmployeeSpecification.firstName(filter.getName())
+			                                  .or(EmployeeSpecification.lastName(filter.getName())));
 		}
-		return this.repository.findAll(pageable);
+		if (filter.hasAge()) {
+			specification = specification.and(EmployeeSpecification.age(filter.getAge()));
+		}
+		if (filter.hasRole()) {
+			specification = specification.and(EmployeeSpecification.role(filter.getRole()));
+		}
+		return this.repository.findAll(specification, pageable);
 	}
 
 	public Optional<Employee> findById(Long id) {
@@ -59,31 +69,5 @@ public class EmployeeService {
 				.role(employee.getRole());
 
 		return this.repository.save(entity);
-	}
-
-	private Page<Employee> findAllByCriteria(EmployeeRequestFilter filter, Pageable pageable) {
-		switch (filter.getNumber()) {
-		case 1:
-			return this.repository
-					.findAllByFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContaining(	filter.getName(),
-					                                                                      	filter.getName(), pageable);
-		case 2:
-			return this.repository.findAllByAge(filter.getAge(), pageable);
-		case 3:
-			return this.repository.findAllByRoleIgnoreCaseContaining(filter.getRole(), pageable);
-		case 4:
-			return this.repository.findAllByFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContainingAndAge(filter
-			                                                                                                  .getName(), filter.getName(), filter.getAge(), pageable);
-		case 5:
-			return this.repository
-					.findAllByRoleIgnoreCaseContainingAndFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContaining( filter.getRole(),filter
-					                                                                                                  .getName(), filter.getName(), pageable);
-		case 6:
-			return this.repository.findAllByAgeAndRoleIgnoreCaseContaining(filter.getAge(), filter.getRole(), pageable);
-		default:
-			return this.repository
-					.findAllByFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContainingAndAgeAndRoleIgnoreCaseContaining(filter
-					                                                                                                       .getName(), filter.getName(), filter.getAge(), filter.getRole(), pageable);
-		}
 	}
 }
