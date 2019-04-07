@@ -20,6 +20,6 @@ public class EmployeeSpecification {
 
 	public static Specification<Employee> role(String role) {
 		return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder
-				.like(criteriaBuilder.lower(root.get("role")), "%" + role + "%");
+				.like(criteriaBuilder.lower(root.get("role")), "%" + role.toLowerCase() + "%");
 	}
 }
