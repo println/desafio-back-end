@@ -8,38 +8,70 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Utility class for handling pagination.
  *
  * <p>
- * Pagination uses the same principles as the <a href="https://developer.github.com/v3/#pagination">GitHub API</a>,
- * and follow <a href="http://tools.ietf.org/html/rfc5988">RFC 5988 (Link header)</a>.
+ * Pagination uses the same principles as the
+ * <a href="https://developer.github.com/v3/#pagination">GitHub API</a>, and
+ * follow <a href="http://tools.ietf.org/html/rfc5988">RFC 5988 (Link
+ * header)</a>.
  */
 public final class PaginationUtil {
 
-    private PaginationUtil() {
-    }
+	private PaginationUtil() {
+	}
 
-    public static <T> HttpHeaders generatePaginationHttpHeaders(Page<T> page, String baseUrl) {
+	public static <T> HttpHeaders generatePaginationHttpHeaders(Page<T> page, String baseUrl,
+			boolean oneIndexedParameters) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Total-Count", Long.toString(page.getTotalElements()));
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Total-Count", Long.toString(page.getTotalElements()));
-        String link = "";
-        if ((page.getNumber() + 1) < page.getTotalPages()) {
-            link = "<" + generateUri(baseUrl, page.getNumber() + 1, page.getSize()) + ">; rel=\"next\",";
-        }
-        // prev link
-        if ((page.getNumber()) > 0) {
-            link += "<" + generateUri(baseUrl, page.getNumber() - 1, page.getSize()) + ">; rel=\"prev\",";
-        }
-        // last and first link
-        int lastPage = 0;
-        if (page.getTotalPages() > 0) {
-            lastPage = page.getTotalPages() - 1;
-        }
-        link += "<" + generateUri(baseUrl, lastPage, page.getSize()) + ">; rel=\"last\",";
-        link += "<" + generateUri(baseUrl, 0, page.getSize()) + ">; rel=\"first\"";
-        headers.add(HttpHeaders.LINK, link);
-        return headers;
-    }
+		StringBuilder link = gerenateSiblingPage(page, baseUrl, oneIndexedParameters);
+		link.append(generateLastPage(page, baseUrl, oneIndexedParameters));
+		link.append(generateFirstPage(page, baseUrl, oneIndexedParameters));
 
-    private static String generateUri(String baseUrl, int page, int size) {
-        return UriComponentsBuilder.fromUriString(baseUrl).queryParam("page", page).queryParam("size", size).toUriString();
-    }
+		headers.add(HttpHeaders.LINK, link.toString());
+		return headers;
+	}
+
+	private static <T> String generateLastPage(Page<T> page, String baseUrl, boolean oneIndexedParameters) {
+		int lastPage = 0;
+		if (page.getTotalPages() > 0) {
+			lastPage = getNumber(page.getTotalPages() - 1, oneIndexedParameters);
+		}
+		return "<" + generateUri(baseUrl, lastPage, page.getSize()) + ">; rel=\"last\",";
+	}
+
+	private static <T> String generateFirstPage(Page<T> page, String baseUrl, boolean oneIndexedParameters) {
+		return "<" + generateUri(baseUrl, getNumber(0, oneIndexedParameters), page.getSize()) + ">; rel=\"first\"";
+	}
+
+	private static <T> StringBuilder gerenateSiblingPage(Page<T> page, String baseUrl, boolean oneIndexedParameters) {
+		StringBuilder builder = new StringBuilder();
+
+		int totalPages = page.getTotalPages();
+		int pageSize = page.getSize();
+		int pageNumber = page.getNumber();
+
+		if (pageNumber + 1 < totalPages) {
+			builder.append("<" + generateUri(baseUrl, getNumber(pageNumber, oneIndexedParameters) + 1, pageSize) + ">; rel=\"next\",");
+		}
+
+		if (pageNumber > 0) {
+			builder.append("<" + generateUri(baseUrl, getNumber(pageNumber, oneIndexedParameters) - 1, pageSize) + ">; rel=\"prev\",");
+		}
+
+		return builder;
+	}
+
+	private static int getNumber(int pageNumber, boolean oneIndexedParameters) {
+		if (oneIndexedParameters) {
+			return pageNumber + 1;
+		}
+		return pageNumber;
+	}
+
+	private static String generateUri(String baseUrl, int page, int size) {
+		return UriComponentsBuilder.fromUriString(baseUrl)
+				.queryParam("page", page)
+				.queryParam("size", size)
+				.toUriString();
+	}
 }

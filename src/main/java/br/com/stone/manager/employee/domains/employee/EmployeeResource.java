@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -45,22 +46,26 @@ public class EmployeeResource {
 		this.log.debug("REST request to save Employee : {}", employee);
 		Employee result = this.service.create(employee);
 		return ResponseEntity.created(new URI("/api/employees/" + result.getId()))
-				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
+				.headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+				.body(result);
 	}
 
 	@PutMapping("/employees/{id}")
-	public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @RequestBody Employee employee) throws URISyntaxException {
+	public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @RequestBody Employee employee)
+			throws URISyntaxException {
 		this.log.debug("REST request to update Employee : {}", employee);
 		Employee result = this.service.update(id, employee);
-		return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
+		return ResponseEntity.ok()
+				.headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
 				.body(result);
 	}
 
 	@GetMapping("/employees")
-	public ResponseEntity<List<Employee>> getAllEmployees(Pageable pageable) {
+	public ResponseEntity<List<Employee>> getAllEmployees(Pageable pageable,
+			@Value("${spring.data.web.pageable.one-indexed-parameters}") boolean oneIndexedParameters) {
 		this.log.debug("REST request to get a page of Employees");
 		Page<Employee> page = this.service.findAll(pageable);
-		HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees");
+		HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees", oneIndexedParameters);
 		return ResponseEntity.ok().headers(headers).body(page.getContent());
 	}
 
