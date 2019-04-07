@@ -20,7 +20,10 @@ public class EmployeeService {
 		this.repository = repository;
 	}
 
-	public Page<Employee> findAll(Pageable pageable) {
+	public Page<Employee> findAll(EmployeeRequestFilter filter, Pageable pageable) {
+		if (!filter.isEmpty()) {
+			return this.findAllByCriteria(filter, pageable);
+		}
 		return this.repository.findAll(pageable);
 	}
 
@@ -56,5 +59,31 @@ public class EmployeeService {
 				.role(employee.getRole());
 
 		return this.repository.save(entity);
+	}
+
+	private Page<Employee> findAllByCriteria(EmployeeRequestFilter filter, Pageable pageable) {
+		switch (filter.getNumber()) {
+		case 1:
+			return this.repository
+					.findAllByFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContaining(	filter.getName(),
+					                                                                      	filter.getName(), pageable);
+		case 2:
+			return this.repository.findAllByAge(filter.getAge(), pageable);
+		case 3:
+			return this.repository.findAllByRoleIgnoreCaseContaining(filter.getRole(), pageable);
+		case 4:
+			return this.repository.findAllByFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContainingAndAge(filter
+			                                                                                                  .getName(), filter.getName(), filter.getAge(), pageable);
+		case 5:
+			return this.repository
+					.findAllByRoleIgnoreCaseContainingAndFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContaining( filter.getRole(),filter
+					                                                                                                  .getName(), filter.getName(), pageable);
+		case 6:
+			return this.repository.findAllByAgeAndRoleIgnoreCaseContaining(filter.getAge(), filter.getRole(), pageable);
+		default:
+			return this.repository
+					.findAllByFirstNameIgnoreCaseContainingOrLastNameIgnoreCaseContainingAndAgeAndRoleIgnoreCaseContaining(filter
+					                                                                                                       .getName(), filter.getName(), filter.getAge(), filter.getRole(), pageable);
+		}
 	}
 }

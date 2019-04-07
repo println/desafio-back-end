@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.stone.manager.employee.support.utils.controller.RestApiController;
@@ -32,6 +33,9 @@ import br.com.stone.manager.employee.support.web.rest.util.ResponseUtil;
 public class EmployeeResource {
 
 	private final Logger log = LoggerFactory.getLogger(EmployeeResource.class);
+
+	@Value("${spring.data.web.pageable.one-indexed-parameters}")
+	private boolean oneIndexedParameters;
 
 	private static final String ENTITY_NAME = "employee";
 
@@ -61,11 +65,15 @@ public class EmployeeResource {
 	}
 
 	@GetMapping("/employees")
-	public ResponseEntity<List<Employee>> getAllEmployees(Pageable pageable,
-			@Value("${spring.data.web.pageable.one-indexed-parameters}") boolean oneIndexedParameters) {
+	public ResponseEntity<List<Employee>> getAllEmployees(
+			@RequestParam(required = false) String name,
+			@RequestParam(required = false) Integer age,
+			@RequestParam(required = false) String role,
+			Pageable pageable) {
 		this.log.debug("REST request to get a page of Employees");
-		Page<Employee> page = this.service.findAll(pageable);
-		HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees", oneIndexedParameters);
+		Page<Employee> page = this.service.findAll(new EmployeeRequestFilter(name, age, role), pageable);
+		HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(	page, "/api/employees",
+		                                                                   	this.oneIndexedParameters);
 		return ResponseEntity.ok().headers(headers).body(page.getContent());
 	}
 
