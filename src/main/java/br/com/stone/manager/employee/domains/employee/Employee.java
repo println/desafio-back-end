@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -21,7 +22,8 @@ public class Employee extends AuditableModel<Employee> {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "employee_id_seq")
+	@SequenceGenerator(name="employee_id_seq", sequenceName = "EMPLOYEE_SEQ",  allocationSize = 1)
 	private Long id;
 
 	@NotNull(message = "First name cannot be null")
