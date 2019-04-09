@@ -11,6 +11,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import br.com.stone.manager.employee.support.utils.model.AuditableModel;
@@ -23,14 +24,14 @@ public class Employee extends AuditableModel<Employee> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "employee_id_seq")
-	@SequenceGenerator(name="employee_id_seq", sequenceName = "EMPLOYEE_SEQ",  allocationSize = 1)
+	@SequenceGenerator(name = "employee_id_seq", sequenceName = "EMPLOYEE_SEQ", allocationSize = 1)
 	private Long id;
 
-	@NotNull(message = "First name cannot be null")
+	@NotBlank(message = "First name may not be blank")
 	@Column(name = "first_name")
 	private String firstName;
 
-	@NotNull(message = "Last name cannot be null")
+	@NotBlank(message = "Last name may not be blank")
 	@Column(name = "last_name")
 	private String lastName;
 
@@ -40,7 +41,7 @@ public class Employee extends AuditableModel<Employee> {
 	@Column(name = "age")
 	private int age;
 
-	@NotNull
+	@NotBlank(message = "Role may not be blank")
 	@Column(name = "role")
 	private String role;
 
@@ -142,7 +143,5 @@ public class Employee extends AuditableModel<Employee> {
 		builder.append("]");
 		return builder.toString();
 	}
-
-
 
 }
