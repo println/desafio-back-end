@@ -77,6 +77,13 @@ public class EmployeeResource {
 		return ResponseEntity.ok().headers(headers).body(page.getContent());
 	}
 
+	@GetMapping("/employees/count")
+	public ResponseEntity<Long> countEmployees() {
+		this.log.debug("REST request to get a page of Employees");
+		Long count = this.service.count();
+		return ResponseEntity.ok().body(count);
+	}
+
 	@GetMapping("/employees/{id}")
 	public ResponseEntity<Employee> getEmployee(@PathVariable Long id) {
 		this.log.debug("REST request to get Employee : {}", id);

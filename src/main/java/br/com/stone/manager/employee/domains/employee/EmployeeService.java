@@ -41,6 +41,10 @@ public class EmployeeService {
 		return this.repository.findById(id);
 	}
 
+	public Long count() {
+		return this.repository.count();
+	}
+
 	public void deleteById(Long id) {
 		this.repository.deleteById(id);
 	}
@@ -70,4 +74,6 @@ public class EmployeeService {
 
 		return this.repository.save(entity);
 	}
+
+
 }
